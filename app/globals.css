@@ -1,1 +1,25 @@
 @import "tailwindcss";
+
+@theme {
+	--color-cream: #fbf5ec;
+	--font-sans: var(--font-excalifont), system-ui, sans-serif;
+	--font-display: var(--font-lilita), var(--font-excalifont), cursive;
+
+	--text-ex-sm: 16px;
+	--text-ex-md: 20px;
+	--text-ex-lg: 28px;
+	--text-ex-xl: 36px;
+}
+
+body {
+	background-color: var(--color-cream);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: var(--font-display);
+}

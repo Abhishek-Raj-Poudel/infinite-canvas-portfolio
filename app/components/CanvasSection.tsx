@@ -9,7 +9,7 @@ interface CanvasSectionProps {
 export default function CanvasSection({ x, y, children }: CanvasSectionProps) {
   return (
     <div
-      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+      className="absolute -translate-x-1/2 -translate-y-1/2 w-[36rem] max-w-[90vw]"
       style={{ left: x, top: y }}
     >
       {children}
