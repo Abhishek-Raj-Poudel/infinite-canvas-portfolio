@@ -1,6 +1,11 @@
 "use client";
 
-import type { ReactNode, ButtonHTMLAttributes } from "react";
+import type {
+	ReactNode,
+	ButtonHTMLAttributes,
+	MouseEvent,
+	TouchEvent,
+} from "react";
 import { cn } from "@/lib/utils";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -20,21 +25,37 @@ export default function Button({
 	variant = "default",
 	size = "default",
 	type,
+	onMouseDown,
+	onTouchStart,
 	...props
 }: ButtonProps) {
 	const isPositioned = x !== undefined || y !== undefined;
 
+	const stopCanvasDrag = (e: MouseEvent<HTMLButtonElement>) => {
+		e.stopPropagation();
+		onMouseDown?.(e);
+	};
+
+	const stopCanvasTouch = (e: TouchEvent<HTMLButtonElement>) => {
+		e.stopPropagation();
+		onTouchStart?.(e);
+	};
+
 	if (isPositioned) {
 		return (
-			<div
+			<button
+				type={type ?? "button"}
 				className={cn(
-					"absolute -translate-x-1/2 -translate-y-1/2 bg-amber-400 text-black text-nowrap rounded-lg w-fit p-8 py-3",
+					"absolute -translate-x-1/2 -translate-y-1/2 bg-amber-400 text-black text-nowrap rounded-lg w-fit p-8 py-3 cursor-pointer select-none",
 					className,
 				)}
 				style={{ left: x, top: y }}
+				onMouseDown={stopCanvasDrag}
+				onTouchStart={stopCanvasTouch}
+				{...props}
 			>
 				{children}
-			</div>
+			</button>
 		);
 	}
 
@@ -50,6 +71,8 @@ export default function Button({
 				size === "icon" && "h-8 w-8",
 				className,
 			)}
+			onMouseDown={onMouseDown}
+			onTouchStart={onTouchStart}
 			{...props}
 		>
 			{children}

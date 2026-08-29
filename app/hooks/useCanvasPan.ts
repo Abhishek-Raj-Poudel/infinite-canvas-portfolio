@@ -1,100 +1,177 @@
 "use client";
-import { useEffect, useRef, useState, MouseEventHandler, TouchEventHandler } from "react";
+import {
+	useEffect,
+	useRef,
+	useState,
+	MouseEventHandler,
+	TouchEventHandler,
+} from "react";
+import { useSectionRegistry } from "@/context/SectionRegistryContext";
+
+function easeInOutCubic(t: number): number {
+	return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
 
 export default function useCanvasPan() {
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const isDragging = useRef(false);
-  const lastMouse = useRef({ x: 0, y: 0 });
+	const [offset, setOffset] = useState({ x: 0, y: 0 });
+	const isDragging = useRef(false);
+	const lastMouse = useRef({ x: 0, y: 0 });
+	const animationRef = useRef<number>(0);
+	const offsetRef = useRef({ x: 0, y: 0 });
+	const { getSection } = useSectionRegistry();
 
-  // Center canvas on mount (window not available during SSR)
-  useEffect(() => {
-    setOffset({
-      x: window.innerWidth / 2,
-      y: window.innerHeight / 2,
-    });
-  }, []);
+	const setOffsetBoth = (next: { x: number; y: number }) => {
+		offsetRef.current = next;
+		setOffset(next);
+	};
 
-  // Mouse events
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDragging.current) return;
+	// Center canvas on mount (window not available during SSR)
+	useEffect(() => {
+		setOffsetBoth({
+			x: window.innerWidth / 2,
+			y: window.innerHeight / 2,
+		});
+	}, []);
 
-      const dx = e.clientX - lastMouse.current.x;
-      const dy = e.clientY - lastMouse.current.y;
+	useEffect(() => {
+		return () => cancelAnimationFrame(animationRef.current);
+	}, []);
 
-      setOffset((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
-      lastMouse.current = { x: e.clientX, y: e.clientY };
-    };
+	const cancelAnimation = () => {
+		cancelAnimationFrame(animationRef.current);
+		animationRef.current = 0;
+	};
 
-    const handleMouseUp = () => {
-      isDragging.current = false;
-    };
+	const centerOnSection = (id: string) => {
+		if (typeof window === "undefined") return;
+		const section = getSection(id);
+		if (!section) return;
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
+		const target = {
+			x: window.innerWidth / 2 - section.x,
+			y: window.innerHeight / 2 - section.y,
+		};
+		const start = offsetRef.current;
+		const startTime = performance.now();
+		const duration = 600;
 
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, []);
+		cancelAnimation();
 
-  // Touch events
-  useEffect(() => {
-    const handleTouchStart = (e: TouchEvent) => {
-      isDragging.current = true;
-      lastMouse.current = {
-        x: e.touches[0].clientX,
-        y: e.touches[0].clientY,
-      };
-    };
+		const step = (now: number) => {
+			if (isDragging.current) return;
+			const elapsed = now - startTime;
+			const progress = Math.min(1, elapsed / duration);
+			const eased = easeInOutCubic(progress);
 
-    const handleTouchMove = (e: TouchEvent) => {
-      if (!isDragging.current) return;
+			setOffsetBoth({
+				x: start.x + (target.x - start.x) * eased,
+				y: start.y + (target.y - start.y) * eased,
+			});
 
-      const dx = e.touches[0].clientX - lastMouse.current.x;
-      const dy = e.touches[0].clientY - lastMouse.current.y;
+			if (progress < 1) {
+				animationRef.current = requestAnimationFrame(step);
+			} else {
+				animationRef.current = 0;
+			}
+		};
 
-      setOffset((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
-      lastMouse.current = {
-        x: e.touches[0].clientX,
-        y: e.touches[0].clientY,
-      };
-    };
+		animationRef.current = requestAnimationFrame(step);
+	};
 
-    const handleTouchEnd = () => {
-      isDragging.current = false;
-    };
+	// Mouse events
+	useEffect(() => {
+		const handleMouseMove = (e: MouseEvent) => {
+			if (!isDragging.current) return;
 
-    window.addEventListener("touchstart", handleTouchStart);
-    window.addEventListener("touchmove", handleTouchMove);
-    window.addEventListener("touchend", handleTouchEnd);
+			cancelAnimation();
 
-    return () => {
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", handleTouchEnd);
-    };
-  }, []);
+			const dx = e.clientX - lastMouse.current.x;
+			const dy = e.clientY - lastMouse.current.y;
 
-  const handleMouseDown: MouseEventHandler = (e) => {
-    isDragging.current = true;
-    lastMouse.current = { x: e.clientX, y: e.clientY };
-  };
+			setOffset((prev) => {
+				const next = { x: prev.x + dx, y: prev.y + dy };
+				offsetRef.current = next;
+				return next;
+			});
+			lastMouse.current = { x: e.clientX, y: e.clientY };
+		};
 
-  const handleTouchStartReact: TouchEventHandler = (e) => {
-    isDragging.current = true;
-    lastMouse.current = {
-      x: e.touches[0].clientX,
-      y: e.touches[0].clientY,
-    };
-  };
+		const handleMouseUp = () => {
+			isDragging.current = false;
+		};
 
-  return {
-    offset,
-    handlers: {
-      onMouseDown: handleMouseDown,
-      onTouchStart: handleTouchStartReact,
-    },
-  };
+		window.addEventListener("mousemove", handleMouseMove);
+		window.addEventListener("mouseup", handleMouseUp);
+
+		return () => {
+			window.removeEventListener("mousemove", handleMouseMove);
+			window.removeEventListener("mouseup", handleMouseUp);
+		};
+	}, []);
+
+	// Touch events
+	useEffect(() => {
+		const handleTouchStart = (e: TouchEvent) => {
+			isDragging.current = true;
+			lastMouse.current = {
+				x: e.touches[0].clientX,
+				y: e.touches[0].clientY,
+			};
+		};
+
+		const handleTouchMove = (e: TouchEvent) => {
+			if (!isDragging.current) return;
+
+			cancelAnimation();
+
+			const dx = e.touches[0].clientX - lastMouse.current.x;
+			const dy = e.touches[0].clientY - lastMouse.current.y;
+
+			setOffset((prev) => {
+				const next = { x: prev.x + dx, y: prev.y + dy };
+				offsetRef.current = next;
+				return next;
+			});
+			lastMouse.current = {
+				x: e.touches[0].clientX,
+				y: e.touches[0].clientY,
+			};
+		};
+
+		const handleTouchEnd = () => {
+			isDragging.current = false;
+		};
+
+		window.addEventListener("touchstart", handleTouchStart);
+		window.addEventListener("touchmove", handleTouchMove);
+		window.addEventListener("touchend", handleTouchEnd);
+
+		return () => {
+			window.removeEventListener("touchstart", handleTouchStart);
+			window.removeEventListener("touchmove", handleTouchMove);
+			window.removeEventListener("touchend", handleTouchEnd);
+		};
+	}, []);
+
+	const handleMouseDown: MouseEventHandler = (e) => {
+		isDragging.current = true;
+		lastMouse.current = { x: e.clientX, y: e.clientY };
+	};
+
+	const handleTouchStartReact: TouchEventHandler = (e) => {
+		isDragging.current = true;
+		lastMouse.current = {
+			x: e.touches[0].clientX,
+			y: e.touches[0].clientY,
+		};
+	};
+
+	return {
+		offset,
+		centerOnSection,
+		handlers: {
+			onMouseDown: handleMouseDown,
+			onTouchStart: handleTouchStartReact,
+		},
+	};
 }
