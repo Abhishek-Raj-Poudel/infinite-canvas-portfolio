@@ -1,6 +1,6 @@
 "use client";
-import useCanvasPan from "@/hooks/useCanvasPan";
 import CanvasSection from "@/components/CanvasSection";
+import useCanvasPan from "@/hooks/useCanvasPan";
 import Button from "./components/ui/Button";
 
 export default function Home() {
@@ -18,11 +18,11 @@ export default function Home() {
         }}
       >
         <CanvasSection x={0} y={0}>
-          <div className="relative flex h-[24rem] w-[36rem] items-center justify-center">
-            <Button className="absolute left-[28%] top-[14%]">About me</Button>
-            <Button className="absolute left-[70%] top-[14%]">My Notes</Button>
-            <Button className="absolute left-[4%] top-[50%]">Projects</Button>
-            <Button className="absolute left-[47%] top-[76%]">Hire Me</Button>
+          <section className=" flex hx-[24rem] w-xl items-center justify-center">
+            <Button x={285} y={-200} >About me</Button>
+            <Button x={530} y={-200}>My Notes</Button>
+            <Button x={-125} y={35}>Projects</Button>
+            <Button x={285} y={290}>Hire Me</Button>
 
             <div className="text-center">
               <h1 className="text-5xl">Hey! I make cook stuff</h1>
@@ -32,7 +32,7 @@ export default function Home() {
                 have made
               </p>
             </div>
-          </div>
+          </section>
         </CanvasSection>
 
         <CanvasSection x={-400} y={-600}>
