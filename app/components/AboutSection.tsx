@@ -76,12 +76,10 @@ export default function AboutSection() {
 
 			{/* Right: another square */}
 			<div
-				className="absolute -translate-x-1/2 -translate-y-1/2 bg-white text-black rounded-xl flex items-center justify-center overflow-hidden h-fit"
-				style={{ left: 430, top: 0, width: 260, height: 400 }}
+				className="absolute -translate-x-1/2 -translate-y-1/2 rounded-xl flex items-center justify-center overflow-hidden h-fit"
+				style={{ left: 460, top: 0, width: 400, height: 400 }}
 			>
-				<div style={{ transform: "scale(1)" }}>
-					<IconCloud images={techIcons} />
-				</div>
+				<IconCloud images={techIcons} />
 			</div>
 		</>
 	);
