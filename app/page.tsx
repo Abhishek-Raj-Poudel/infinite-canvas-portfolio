@@ -2,6 +2,7 @@
 import CanvasSection from "@/components/CanvasSection";
 import useCanvasPan from "@/hooks/useCanvasPan";
 import Button from "./components/ui/Button";
+import AboutSection from "./components/AboutSection";
 
 export default function Home() {
   const { offset, handlers } = useCanvasPan();
@@ -36,7 +37,7 @@ export default function Home() {
         </CanvasSection>
 
         <CanvasSection x={-400} y={-600}>
-          About section
+          <AboutSection />
         </CanvasSection>
       </div>
     </main>
