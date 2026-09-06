@@ -3,17 +3,8 @@ import CanvasSection from "@/components/CanvasSection";
 import useCanvasPan from "@/hooks/useCanvasPan";
 import Button from "./components/ui/Button";
 import AboutSection from "./components/AboutSection";
-import { SectionRegistryProvider } from "@/context/SectionRegistryContext";
 
 export default function Home() {
-  return (
-    <SectionRegistryProvider>
-      <Canvas />
-    </SectionRegistryProvider>
-  );
-}
-
-function Canvas() {
   const { offset, handlers, centerOnSection } = useCanvasPan();
 
   return (

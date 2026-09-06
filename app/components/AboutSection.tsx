@@ -29,11 +29,10 @@ const techIcons = [
 
 export default function AboutSection() {
 	return (
-		<>
+		<section className="relative flex justify-center items-start w-fit gap-10">
 			{/* Left: picture square */}
 			<div
-				className="absolute -translate-x-1/2 -translate-y-1/2 bg-amber-400 text-black rounded-xl overflow-hidden aspect-square"
-				style={{ left: -430, top: 0, width: 260, height: 400 }}
+				className=" w-[300px] h-[400px] bg-amber-400 text-black rounded-xl overflow-hidden aspect-square"
 			>
 				{/* eslint-disable-next-line @next/next/no-img-element */}
 				<img
@@ -45,7 +44,7 @@ export default function AboutSection() {
 
 			{/* Middle: title + content */}
 			<div
-				className="absolute -translate-x-1/2 -translate-y-1/2 text-black rounded-xl p-8"
+				className=" text-black rounded-xl p-8"
 				style={{ left: 0, top: 0, width: 520 }}
 			>
 				<h2 className="text-ex-lg font-display mb-4">Full Stack Developer</h2>
@@ -76,11 +75,11 @@ export default function AboutSection() {
 
 			{/* Right: another square */}
 			<div
-				className="absolute -translate-x-1/2 -translate-y-1/2 rounded-xl flex items-center justify-center overflow-hidden h-fit"
+				className=" self-end rounded-xl flex items-center justify-center overflow-hidden h-fit"
 				style={{ left: 460, top: 0, width: 400, height: 400 }}
 			>
 				<IconCloud images={techIcons} />
 			</div>
-		</>
+		</section>
 	);
 }

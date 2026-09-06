@@ -6,7 +6,6 @@ import {
 	MouseEventHandler,
 	TouchEventHandler,
 } from "react";
-import { useSectionRegistry } from "@/context/SectionRegistryContext";
 
 function easeInOutCubic(t: number): number {
 	return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -18,7 +17,6 @@ export default function useCanvasPan() {
 	const lastMouse = useRef({ x: 0, y: 0 });
 	const animationRef = useRef<number>(0);
 	const offsetRef = useRef({ x: 0, y: 0 });
-	const { getSection } = useSectionRegistry();
 
 	const setOffsetBoth = (next: { x: number; y: number }) => {
 		offsetRef.current = next;
@@ -44,14 +42,22 @@ export default function useCanvasPan() {
 
 	const centerOnSection = (id: string) => {
 		if (typeof window === "undefined") return;
-		const section = getSection(id);
-		if (!section) return;
+		const el = document.getElementById(id);
+		if (!el) return;
 
-		const target = {
-			x: window.innerWidth / 2 - section.x,
-			y: window.innerHeight / 2 - section.y,
-		};
+		const rect = el.getBoundingClientRect();
+		const sectionCenterX = rect.left + rect.width / 2;
+		const sectionCenterY = rect.top + rect.height / 2;
+
+		const screenCenterX = window.innerWidth / 2;
+		const screenCenterY = window.innerHeight / 2;
+
+		// How much we need to pan to bring the section center to the screen center
+		const panX = screenCenterX - sectionCenterX;
+		const panY = screenCenterY - sectionCenterY;
+
 		const start = offsetRef.current;
+		const target = { x: start.x + panX, y: start.y + panY };
 		const startTime = performance.now();
 		const duration = 600;
 
